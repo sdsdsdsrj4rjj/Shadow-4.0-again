@@ -17,7 +17,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '8' # Ensures best native compatibility with Eaglercraft 1.8 build structures
+        java-version: '8' # Native target required by Eaglercraft 1.8 buildtools
         cache: 'gradle'
 
     - name: Grant execute permission for scripts
@@ -25,44 +25,47 @@ jobs:
         chmod +x gradlew
         chmod +x MakeSignedClient.sh
 
-    - name: Step 1 - Build Project and Core WebAssembly
+    - name: Step 1 - Build Essential Compiler JARs
       run: |
-        ./gradlew clean compileJava teavmCompileAll build -x test || ./gradlew teavmCompileAll || true
+        # Assembles the MakeOfflineDownload.jar and CompileEPK.jar files inside desktopRuntime/
+        ./gradlew :desktopRuntime:jar || ./gradlew jar
 
-    - name: Step 2 - Sync Web Assets Into Target Location
+    - name: Step 2 - Compile JavaScript Game Core
       run: |
+        # Shadow 4.0 uses teavmCompileWeb to generate the web player classes
+        ./gradlew teavmCompileWeb
+
+    - name: Step 3 - Safeguard JavaScript Directories
+      run: |
+        # Verify and transfer workspace products from build/ hooks into javascript/
         mkdir -p javascript
-        # Move actual client assets from TeaVM hooks into workspace bundler directory
-        if [ -d "build/teavm" ] && [ "$(ls -A build/teavm)" ]; then cp -r build/teavm/* javascript/ 2>/dev/null || true; fi
-        if [ -d "stable-download/teavm" ] && [ "$(ls -A stable-download/teavm)" ]; then cp -r stable-download/teavm/* javascript/ 2>/dev/null || true; fi
+        if [ -d "build/teavm" ]; then cp -r build/teavm/* javascript/ 2>/dev/null || true; fi
         
-        # Build dummy text placeholders if template configurations are uncommitted
-        if [ ! -f "javascript/SignedBundleTemplate.txt" ]; then echo "<!-- Bundle Template -->" > javascript/SignedBundleTemplate.txt; fi
-        if [ ! -f "javascript/SignedClientTemplate.txt" ]; then echo "<!-- Client Template -->" > javascript/SignedClientTemplate.txt; fi
+        # Inject standard boilerplate configurations if they are missing from your repository
+        if [ ! -f "javascript/SignedBundleTemplate.txt" ]; then echo "<!-- Bundle -->" > javascript/SignedBundleTemplate.txt; fi
+        if [ ! -f "javascript/SignedClientTemplate.txt" ]; then echo "<!-- Client -->" > javascript/SignedClientTemplate.txt; fi
         if [ ! -f "javascript/UpdateDownloadSources.txt" ]; then echo "[]" > javascript/UpdateDownloadSources.txt; fi
 
-    - name: Step 3 - Compile Required Bundling Tooling
+    - name: Step 4 - Generate Standalone Offline HTML File
       run: |
-        ./gradlew :desktopRuntime:jar || ./gradlew jar || true
-
-    - name: Step 4 - Generate Game Offline Client
-      run: |
+        # Execute the bundling script natively in a headless sandbox environment
         export JAVA_TOOL_OPTIONS="-Djava.awt.headless=true"
-        sh MakeSignedClient.sh || bash MakeSignedClient.sh || true
+        sh MakeSignedClient.sh
 
-    - name: Step 5 - Isolate game HTML and Purge Java Documentation
+    - name: Step 5 - Check Output Content (Safety Step)
       run: |
-        # Look for the game package specifically inside the project root and bypass gradle cache directories
-        if [ -f "javascript/EaglercraftX_1.8_Offline_Signed_Client.html" ]; then
-          cp javascript/EaglercraftX_1.8_Offline_Signed_Client.html ./EaglercraftX_1.8_Offline_Signed_Client.html
-        else
-          # Fallback: Find html files while intentionally ignoring gradle's javadoc caches
-          find . -type d \( -path "./build" -o -path "./.gradle" \) -prune -o -type f -name "*Offline*.html" -exec cp {} ./EaglercraftX_1.8_Offline_Signed_Client.html \; || true
+        echo "=== Listing JavaScript Folder ==="
+        ls -la javascript/
+        
+        # Verify the file exists before passing it to the uploader
+        if [ ! -f "javascript/EaglercraftX_1.8_Offline_Signed_Client.html" ]; then
+          echo "ERROR: The compilation tool did not write the HTML output file!"
+          exit 1
         fi
 
     - name: Upload Clean Offline HTML Client
       uses: actions/upload-artifact@v4
       with:
         name: EaglercraftX-Offline-Client
-        path: ./EaglercraftX_1.8_Offline_Signed_Client.html
+        path: javascript/EaglercraftX_1.8_Offline_Signed_Client.html
         if-no-files-found: error
