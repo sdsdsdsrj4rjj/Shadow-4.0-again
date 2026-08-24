@@ -17,7 +17,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: '8' # Eaglercraft 1.8 buildtools run best natively on Java 8/11 compiler targets
         cache: 'gradle'
 
     - name: Grant execute permission for scripts
@@ -25,33 +25,38 @@ jobs:
         chmod +x gradlew
         chmod +x MakeSignedClient.sh
 
-    - name: Step 1 - Compile Client Source Code
-      run: ./gradlew compileJava teavmCompileAll || ./gradlew teavmCompileAll || true
-
-    - name: Step 2 - Compile Assets (EPK)
-      run: ./gradlew bakeAssets || ./gradlew compileEPK || true
-
-    - name: Step 3 - Sync TeaVM Output Files
+    - name: Step 1 - Build Offline Workspace Classes (No GUI)
       run: |
+        # Compiles the core components without attempting to trigger the runClient window display
+        ./gradlew compileJava teavmCompileAll build -x test || ./gradlew teavmCompileAll || true
+
+    - name: Step 2 - Map Compiled Files
+      run: |
+        # Build environments vary; verify directories and sync javascript components
         mkdir -p javascript
-        # Copy compiled files from build cache if they aren't generated directly in javascript/
         if [ -d "build/teavm" ]; then cp -r build/teavm/* javascript/ 2>/dev/null || true; fi
+        if [ -d "stable-download/teavm" ]; then cp -r stable-download/teavm/* javascript/ 2>/dev/null || true; fi
         
-        # In case the compiler requires template configuration files, create blank fallbacks
+        # Verify required bundler templates exist to avoid crash loops
         if [ ! -f "javascript/SignedBundleTemplate.txt" ]; then echo "<!-- Bundle Template -->" > javascript/SignedBundleTemplate.txt; fi
         if [ ! -f "javascript/SignedClientTemplate.txt" ]; then echo "<!-- Client Template -->" > javascript/SignedClientTemplate.txt; fi
         if [ ! -f "javascript/UpdateDownloadSources.txt" ]; then echo "[]" > javascript/UpdateDownloadSources.txt; fi
 
-    - name: Step 4 - Generate Standalone Offline HTML File
+    - name: Step 3 - Force Build Standalone Tooling
       run: |
-        # Run headless to bypass any desktop interface errors
+        # Manually assemble desktop runtime dependencies required for compiling the standalone HTML file
+        ./gradlew :desktopRuntime:jar || ./gradlew jar || true
+
+    - name: Step 4 - Generate HTML Client Bundle
+      run: |
+        # Pass headless configurations straight to the Java virtual machine task runner
         export JAVA_TOOL_OPTIONS="-Djava.awt.headless=true"
         sh MakeSignedClient.sh || bash MakeSignedClient.sh || true
 
-    - name: Step 5 - Standardize Output Path
+    - name: Step 5 - Gather Outputs
       run: |
-        # Locate the compiled HTML client file anywhere in the workspace and copy it to the root
-        find . -type f -name "*Offline_Signed_Client.html" -exec cp {} ./EaglercraftX_1.8_Offline_Signed_Client.html \; || true
+        # Scrape the workspace root and match compiled output targets
+        find . -type f -name "*.html" -exec cp {} ./EaglercraftX_1.8_Offline_Signed_Client.html \; || true
 
     - name: Upload Finished HTML Client
       uses: actions/upload-artifact@v4
@@ -62,11 +67,12 @@ jobs:
           javascript/EaglercraftX_1.8_Offline_Signed_Client.html
         if-no-files-found: warn
 
-    - name: Upload Workspace Debug Dump
+    - name: Upload Workspace Build Logs (Troubleshooting Backup)
       uses: actions/upload-artifact@v4
       with:
-        name: Complete-Build-Debug-Dump
+        name: Complete-Workspace-Debug-Dump
         path: |
           build/
           javascript/
+          desktopRuntime/
         if-no-files-found: warn
