@@ -1,187 +1,195 @@
 package net.minecraft.client.model;
 
 import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
-
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.minecraft.entity.Entity;
 
 /**+
- * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
- * 
- * Minecraft 1.8.8 bytecode is (c) 2015 Mojang AB. "Do not distribute!"
- * Mod Coder Pack v9.18 deobfuscation configs are (c) Copyright by the MCP Team
- * 
- * EaglercraftX 1.8 patch files (c) 2022-2024 lax1dude, ayunami2000. All Rights Reserved.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * 
+ * Modified EaglercraftX ModelPlayer to inject custom Bedrock JSON geometry maps.
  */
 public class ModelPlayer extends ModelBiped {
-	public ModelRenderer bipedLeftArmwear;
-	public ModelRenderer bipedRightArmwear;
-	public ModelRenderer bipedLeftLegwear;
-	public ModelRenderer bipedRightLegwear;
-	public ModelRenderer bipedBodyWear;
-	private ModelRenderer bipedCape;
-	private ModelRenderer bipedDeadmau5Head;
-	private boolean smallArms;
+    public ModelRenderer bipedLeftArmwear;
+    public ModelRenderer bipedRightArmwear;
+    public ModelRenderer bipedLeftLegwear;
+    public ModelRenderer bipedRightLegwear;
+    public ModelRenderer bipedBodyWear;
+    private ModelRenderer bipedCape;
+    private ModelRenderer bipedDeadmau5Head;
+    private boolean smallArms;
 
-	public ModelPlayer(float parFloat1, boolean parFlag) {
-		super(parFloat1, 0.0F, 64, 64);
-		this.smallArms = parFlag;
-		this.bipedDeadmau5Head = new ModelRenderer(this, 24, 0);
-		this.bipedDeadmau5Head.addBox(-3.0F, -6.0F, -1.0F, 6, 6, 1, parFloat1);
-		this.bipedCape = new ModelRenderer(this, 0, 0);
-		this.bipedCape.setTextureSize(64, 32);
-		this.bipedCape.addBox(-5.0F, 0.0F, -1.0F, 10, 16, 1, parFloat1);
-		if (parFlag) {
-			this.bipedLeftArm = new ModelRenderer(this, 32, 48);
-			this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1);
-			this.bipedLeftArm.setRotationPoint(5.0F, 2.5F, 0.0F);
-			this.bipedRightArm = new ModelRenderer(this, 40, 16);
-			this.bipedRightArm.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1);
-			this.bipedRightArm.setRotationPoint(-5.0F, 2.5F, 0.0F);
-			this.bipedLeftArmwear = new ModelRenderer(this, 48, 48);
-			this.bipedLeftArmwear.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1 + 0.25F);
-			this.bipedLeftArmwear.setRotationPoint(5.0F, 2.5F, 0.0F);
-			this.bipedRightArmwear = new ModelRenderer(this, 40, 32);
-			this.bipedRightArmwear.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1 + 0.25F);
-			this.bipedRightArmwear.setRotationPoint(-5.0F, 2.5F, 10.0F);
-		} else {
-			this.bipedLeftArm = new ModelRenderer(this, 32, 48);
-			this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, parFloat1);
-			this.bipedLeftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
-			this.bipedLeftArmwear = new ModelRenderer(this, 48, 48);
-			this.bipedLeftArmwear.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
-			this.bipedLeftArmwear.setRotationPoint(5.0F, 2.0F, 0.0F);
-			this.bipedRightArmwear = new ModelRenderer(this, 40, 32);
-			this.bipedRightArmwear.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
-			this.bipedRightArmwear.setRotationPoint(-5.0F, 2.0F, 10.0F);
-		}
+    public ModelPlayer(float parFloat1, boolean parFlag) {
+        super(parFloat1, 0.0F, 64, 64);
+        this.smallArms = parFlag;
 
-		this.bipedLeftLeg = new ModelRenderer(this, 16, 48);
-		this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, parFloat1);
-		this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
-		this.bipedLeftLegwear = new ModelRenderer(this, 0, 48);
-		this.bipedLeftLegwear.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
-		this.bipedLeftLegwear.setRotationPoint(1.9F, 12.0F, 0.0F);
-		this.bipedRightLegwear = new ModelRenderer(this, 0, 32);
-		this.bipedRightLegwear.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
-		this.bipedRightLegwear.setRotationPoint(-1.9F, 12.0F, 0.0F);
-		this.bipedBodyWear = new ModelRenderer(this, 16, 32);
-		this.bipedBodyWear.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, parFloat1 + 0.25F);
-		this.bipedBodyWear.setRotationPoint(0.0F, 0.0F, 0.0F);
-	}
+        // --- DEADMAU5 EARS ---
+        this.bipedDeadmau5Head = new ModelRenderer(this, 24, 0);
+        this.bipedDeadmau5Head.addBox(-3.0F, -6.0F, -1.0F, 6, 6, 1, parFloat1);
 
-	/**+
-	 * Sets the models various rotation angles then renders the
-	 * model.
-	 */
-	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) {
-		super.render(entity, f, f1, f2, f3, f4, f5);
-		GlStateManager.pushMatrix();
-		if (this.isChild) {
-			float f6 = 2.0F;
-			GlStateManager.scale(1.0F / f6, 1.0F / f6, 1.0F / f6);
-			GlStateManager.translate(0.0F, 24.0F * f5, 0.0F);
-			this.bipedLeftLegwear.render(f5);
-			this.bipedRightLegwear.render(f5);
-			this.bipedLeftArmwear.render(f5);
-			this.bipedRightArmwear.render(f5);
-			this.bipedBodyWear.render(f5);
-		} else {
-			if (entity != null && entity.isSneaking()) {
-				GlStateManager.translate(0.0F, 0.2F, 0.0F);
-			}
+        // --- CUSTOM BEDROCK CAPE ---
+        this.bipedCape = new ModelRenderer(this, 36, 28);
+        this.bipedCape.setTextureSize(64, 64);
+        this.bipedCape.addBox(-4.0F, 2.0F, 1.0F, 8, 14, 1, parFloat1);
 
-			this.bipedLeftLegwear.render(f5);
-			this.bipedRightLegwear.render(f5);
-			this.bipedLeftArmwear.render(f5);
-			this.bipedRightArmwear.render(f5);
-			this.bipedBodyWear.render(f5);
-		}
+        // --- HEAD & HELMET ---
+        this.bipedHead = new ModelRenderer(this, 0, 0);
+        this.bipedHead.setRotationPoint(0.0F, 0.0F, 0.0F);
+        // Base Head [8x8x8]
+        this.bipedHead.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, parFloat1);
+        // Outer Helmet [9x9x9] mapped to texture UV (32, 0)
+        this.bipedHeadwear = new ModelRenderer(this, 32, 0);
+        this.bipedHeadwear.setRotationPoint(0.0F, 0.0F, 0.0F);
+        this.bipedHeadwear.addBox(-4.5F, -8.5F, -4.5F, 9, 9, 9, parFloat1);
 
-		GlStateManager.popMatrix();
-	}
+        // --- BODY & COAT LAYERS ---
+        this.bipedBody = new ModelRenderer(this, 20, 20);
+        this.bipedBody.setRotationPoint(0.0F, 0.0F, 0.0F);
+        // Cube 1: Main Torso [10x12x5]
+        this.bipedBody.addBox(-5.0F, 0.0F, -2.5F, 10, 12, 5, parFloat1);
+        
+        // Cube 2: Body Overlay/Coat [12x9x8] mapped to texture UV (20, 26)
+        this.bipedBodyWear = new ModelRenderer(this, 20, 26);
+        this.bipedBodyWear.setRotationPoint(0.0F, 0.0F, 0.0F);
+        this.bipedBodyWear.addBox(-6.0F, 2.0F, -4.0F, 12, 9, 8, parFloat1);
 
-	public void renderDeadmau5Head(float parFloat1) {
-		copyModelAngles(this.bipedHead, this.bipedDeadmau5Head);
-		this.bipedDeadmau5Head.rotationPointX = 0.0F;
-		this.bipedDeadmau5Head.rotationPointY = 0.0F;
-		this.bipedDeadmau5Head.render(parFloat1);
-	}
+        // --- LEFT ARM & SLEEVE ---
+        this.bipedLeftArm = new ModelRenderer(this, 32, 48);
+        this.bipedLeftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
+        // Base Arm [3x12x4]
+        this.bipedLeftArm.addBox(-0.5F, -2.0F, -2.0F, 3, 12, 4, parFloat1);
+        
+        this.bipedLeftArmwear = new ModelRenderer(this, 48, 48);
+        this.bipedLeftArmwear.setRotationPoint(5.0F, 2.0F, 0.0F);
+        // Left Sleeve [3.5x12x4.5]
+        this.bipedLeftArmwear.addBox(-0.75F, -2.0F, -2.25F, 3.5F, 12, 4.5F, parFloat1);
 
-	public void renderCape(float parFloat1) {
-		GlStateManager.matrixMode(GL_TEXTURE);
-		GlStateManager.pushMatrix();
-		GlStateManager.scale(2.0f, 1.0f, 1.0f);
-		GlStateManager.matrixMode(GL_MODELVIEW);
-		this.bipedCape.render(parFloat1);
-		GlStateManager.matrixMode(GL_TEXTURE);
-		GlStateManager.popMatrix();
-		GlStateManager.matrixMode(GL_MODELVIEW);
-	}
+        // --- RIGHT ARM & SLEEVE ---
+        this.bipedRightArm = new ModelRenderer(this, 40, 16);
+        this.bipedRightArm.setRotationPoint(-5.0F, 2.0F, 0.0F);
+        // Base Arm [3x12x4]
+        this.bipedRightArm.addBox(-2.5F, -2.0F, -2.0F, 3, 12, 4, parFloat1);
+        
+        this.bipedRightArmwear = new ModelRenderer(this, 40, 32);
+        this.bipedRightArmwear.setRotationPoint(-5.0F, 2.0F, 0.0F);
+        // Right Sleeve [3.5x12x4.5]
+        this.bipedRightArmwear.addBox(-2.75F, -2.0F, -2.25F, 3.5F, 12, 4.5F, parFloat1);
 
-	/**+
-	 * Sets the model's various rotation angles. For bipeds, par1
-	 * and par2 are used for animating the movement of arms and
-	 * legs, where par1 represents the time(so that arms and legs
-	 * swing back and forth) and par2 represents how "far" arms and
-	 * legs can swing at most.
-	 */
-	public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5, Entity entity) {
-		super.setRotationAngles(f, f1, f2, f3, f4, f5, entity);
-		copyModelAngles(this.bipedLeftLeg, this.bipedLeftLegwear);
-		copyModelAngles(this.bipedRightLeg, this.bipedRightLegwear);
-		copyModelAngles(this.bipedLeftArm, this.bipedLeftArmwear);
-		copyModelAngles(this.bipedRightArm, this.bipedRightArmwear);
-		copyModelAngles(this.bipedBody, this.bipedBodyWear);
-		if (entity != null && entity.isSneaking()) {
-			this.bipedCape.rotationPointY = 2.0F;
-		} else {
-			this.bipedCape.rotationPointY = 0.0F;
-		}
+        // --- LEFT LEG & PANTS ---
+        this.bipedLeftLeg = new ModelRenderer(this, 16, 48);
+        this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
+        // Base Leg [7x12x6]
+        this.bipedLeftLeg.addBox(-1.9F, 0.0F, -3.0F, 7, 12, 6, parFloat1);
+        
+        this.bipedLeftLegwear = new ModelRenderer(this, 0, 48);
+        this.bipedLeftLegwear.setRotationPoint(1.9F, 12.0F, 0.0F);
+        // Left Pant Layer [7.5x12x6.5]
+        this.bipedLeftLegwear.addBox(-2.15F, 0.0F, -3.25F, 7.5F, 12, 6.5F, parFloat1);
 
-	}
+        // --- RIGHT LEG & PANTS ---
+        this.bipedRightLeg = new ModelRenderer(this, 16, 48);
+        this.bipedRightLeg.setRotationPoint(-1.9F, 12.0F, 0.0F);
+        // Base Leg [7x12x6]
+        this.bipedRightLeg.addBox(-5.1F, 0.0F, -3.0F, 7, 12, 6, parFloat1);
+        
+        this.bipedRightLegwear = new ModelRenderer(this, 0, 48);
+        this.bipedRightLegwear.setRotationPoint(-1.9F, 12.0F, 0.0F);
+        // Right Pant Layer [7.5x12x6.5]
+        this.bipedRightLegwear.addBox(-5.35F, 0.0F, -3.25F, 7.5F, 12, 6.5F, parFloat1);
+    }
 
-	public void renderRightArm() {
-		this.bipedRightArm.render(0.0625F);
-		this.bipedRightArmwear.render(0.0625F);
-	}
+    public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) {
+        super.render(entity, f, f1, f2, f3, f4, f5);
+        GlStateManager.pushMatrix();
+        if (this.isChild) {
+            float f6 = 2.0F;
+            GlStateManager.scale(1.0F / f6, 1.0F / f6, 1.0F / f6);
+            GlStateManager.translate(0.0F, 24.0F * f5, 0.0F);
+            this.bipedLeftLegwear.render(f5);
+            this.bipedRightLegwear.render(f5);
+            this.bipedLeftArmwear.render(f5);
+            this.bipedRightArmwear.render(f5);
+            this.bipedBodyWear.render(f5);
+        } else {
+            if (entity != null && entity.isSneaking()) {
+                GlStateManager.translate(0.0F, 0.2F, 0.0F);
+            }
+            this.bipedLeftLegwear.render(f5);
+            this.bipedRightLegwear.render(f5);
+            this.bipedLeftArmwear.render(f5);
+            this.bipedRightArmwear.render(f5);
+            this.bipedBodyWear.render(f5);
+        }
+        GlStateManager.popMatrix();
+    }
 
-	public void renderLeftArm() {
-		this.bipedLeftArm.render(0.0625F);
-		this.bipedLeftArmwear.render(0.0625F);
-	}
+    public void renderDeadmau5Head(float parFloat1) {
+        copyModelAngles(this.bipedHead, this.bipedDeadmau5Head);
+        this.bipedDeadmau5Head.rotationPointX = 0.0F;
+        this.bipedDeadmau5Head.rotationPointY = 0.0F;
+        this.bipedDeadmau5Head.render(parFloat1);
+    }
 
-	public void setInvisible(boolean flag) {
-		super.setInvisible(flag);
-		this.bipedLeftArmwear.showModel = flag;
-		this.bipedRightArmwear.showModel = flag;
-		this.bipedLeftLegwear.showModel = flag;
-		this.bipedRightLegwear.showModel = flag;
-		this.bipedBodyWear.showModel = flag;
-		this.bipedCape.showModel = flag;
-		this.bipedDeadmau5Head.showModel = flag;
-	}
+    public void renderCape(float parFloat1) {
+        GlStateManager.matrixMode(GL_TEXTURE);
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(2.0f, 1.0f, 1.0f);
+        GlStateManager.matrixMode(GL_MODELVIEW);
+        this.bipedCape.render(parFloat1);
+        GlStateManager.matrixMode(GL_TEXTURE);
+        GlStateManager.popMatrix();
+        GlStateManager.matrixMode(GL_MODELVIEW);
+    }
 
-	public void postRenderArm(float f) {
-		if (this.smallArms) {
-			++this.bipedRightArm.rotationPointX;
-			this.bipedRightArm.postRender(f);
-			--this.bipedRightArm.rotationPointX;
-		} else {
-			this.bipedRightArm.postRender(f);
-		}
+    public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5, Entity entity) {
+        super.setRotationAngles(f, f1, f2, f3, f4, f5, entity);
+        
+        // Match the outer skins to their respective parent pieces during movements
+        copyModelAngles(this.bipedLeftLeg, this.bipedLeftLegwear);
+        copyModelAngles(this.bipedRightLeg, this.bipedRightLegwear);
+        copyModelAngles(this.bipedLeftArm, this.bipedLeftArmwear);
+        copyModelAngles(this.bipedRightArm, this.bipedRightArmwear);
+        copyModelAngles(this.bipedBody, this.bipedBodyWear);
 
-	}
+        // Apply Bedrock's 12.5-degree default outward arm flair rotation
+        this.bipedRightArm.rotateAngleZ += 0.2182F;
+        this.bipedRightArmwear.rotateAngleZ += 0.2182F;
+        this.bipedLeftArm.rotateAngleZ -= 0.2182F;
+        this.bipedLeftArmwear.rotateAngleZ -= 0.2182F;
+
+        if (entity != null && entity.isSneaking()) {
+            this.bipedCape.rotationPointY = 2.0F;
+        } else {
+            this.bipedCape.rotationPointY = 0.0F;
+        }
+    }
+
+    public void renderRightArm() {
+        this.bipedRightArm.render(0.0625F);
+        this.bipedRightArmwear.render(0.0625F);
+    }
+
+    public void renderLeftArm() {
+        this.bipedLeftArm.render(0.0625F);
+        this.bipedLeftArmwear.render(0.0625F);
+    }
+
+    public void setInvisible(boolean flag) {
+        super.setInvisible(flag);
+        this.bipedLeftArmwear.showModel = flag;
+        this.bipedRightArmwear.showModel = flag;
+        this.bipedLeftLegwear.showModel = flag;
+        this.bipedRightLegwear.showModel = flag;
+        this.bipedBodyWear.showModel = flag;
+        this.bipedCape.showModel = flag;
+        this.bipedDeadmau5Head.showModel = flag;
+    }
+
+    public void postRenderArm(float f) {
+        if (this.smallArms) {
+            ++this.bipedRightArm.rotationPointX;
+            this.bipedRightArm.postRender(f);
+            --this.bipedRightArm.rotationPointX;
+        } else {
+            this.bipedRightArm.postRender(f);
+        }
+    }
 }
