@@ -14,7 +14,7 @@ public class ModelPlayer extends ModelBiped {
     private ModelRenderer bipedDeadmau5Head;
     private boolean smallArms;
 
-    // Custom structural limbs translated from your Blockbench configuration
+    // Custom structural layers from your Blockbench file
     public ModelRenderer bodyExtraLayer1;
     public ModelRenderer bodyExtraLayer2;
     public ModelRenderer bodyExtraLayer3;
@@ -22,6 +22,7 @@ public class ModelPlayer extends ModelBiped {
     public ModelRenderer rightLegChunky;
 
     public ModelPlayer(float parFloat1, boolean parFlag) {
+        // Automatically creates the default base cubes at texture size 64x64
         super(parFloat1, 0.0F, 64, 64);
         this.smallArms = parFlag;
 
@@ -34,45 +35,45 @@ public class ModelPlayer extends ModelBiped {
 
         if (parFlag) { 
             // ==========================================
-            // SLIM MODEL (ALEX) - CUSTOM GEOMETRY APPLIED
+            // SLIM MODEL (ALEX) - SAFE GEOMETRY OVERRIDES
             // ==========================================
             
-            // 1. Head Configurations
-            this.bipedHead = new ModelRenderer(this, 0, 0);
+            // 1. Clear default Steve head box & insert Blockbench configuration
+            this.bipedHead.cubeList.clear();
+            this.bipedHead.setTextureOffset(0, 0);
             this.bipedHead.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8);
-            this.bipedHead.setRotationPoint(0.0F, 0.0F, 0.0F);
             
-            this.bipedHeadwear = new ModelRenderer(this, 32, 0);
+            this.bipedHeadwear.cubeList.clear();
+            this.bipedHeadwear.setTextureOffset(32, 0);
             this.bipedHeadwear.addBox(-4.5F, -8.5F, -4.5F, 9, 9, 9);
-            this.bipedHeadwear.setRotationPoint(0.0F, 0.0F, 0.0F);
 
-            // 2. Body Custom Stacked Boxes
-            this.bipedBody = new ModelRenderer(this, 16, 20);
+            // 2. Clear default body & add custom stacked Blockbench shapes
+            this.bipedBody.cubeList.clear();
+            this.bipedBody.setTextureOffset(16, 20);
             this.bipedBody.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4);
-            this.bipedBody.setRotationPoint(0.0F, 0.0F, 0.0F);
 
-            // Body Extra Layer 1: Blockbench map coordinates [-6, 10, -5, 12, 5, 8]
+            // Add Blockbench sub-boxes as children to preserve tracking angles
             this.bodyExtraLayer1 = new ModelRenderer(this, 16, 29); 
             this.bodyExtraLayer1.addBox(-6.0F, 7.0F, -5.0F, 12, 5, 8);
             this.bipedBody.addChild(this.bodyExtraLayer1);
 
-            // Body Extra Layer 2: Blockbench map coordinates [-6, 15, -5, 12, 4, 6]
             this.bodyExtraLayer2 = new ModelRenderer(this, 16, 25);
             this.bodyExtraLayer2.addBox(-6.0F, 3.0F, -4.0F, 12, 4, 6);
             this.bipedBody.addChild(this.bodyExtraLayer2);
 
-            // Body Extra Layer 3: Blockbench map coordinates [-5, 15, -2.5, 10, 2, 5]
             this.bodyExtraLayer3 = new ModelRenderer(this, 20, 30);
             this.bodyExtraLayer3.addBox(-5.0F, 3.0F, -2.5F, 10, 2, 5);
             this.bipedBody.addChild(this.bodyExtraLayer3);
 
-            // 3. Arms (With Custom Angular Offsets from Blockbench Configuration)
-            this.bipedLeftArm = new ModelRenderer(this, 32, 48);
+            // 3. Reconfigure Slim arms (3-pixel width) inside existing base elements
+            this.bipedLeftArm.cubeList.clear();
+            this.bipedLeftArm.setTextureOffset(32, 48);
             this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4);
             this.bipedLeftArm.setRotationPoint(5.0F, 2.5F, 0.0F);
             this.bipedLeftArm.rotateAngleZ = -0.3054F; // -17.5 degrees
 
-            this.bipedRightArm = new ModelRenderer(this, 40, 16);
+            this.bipedRightArm.cubeList.clear();
+            this.bipedRightArm.setTextureOffset(40, 16);
             this.bipedRightArm.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4);
             this.bipedRightArm.setRotationPoint(-5.0F, 2.5F, 0.0F);
             this.bipedRightArm.rotateAngleZ = 0.2618F; // 15 degrees
@@ -86,8 +87,9 @@ public class ModelPlayer extends ModelBiped {
             this.bipedRightArmwear.setRotationPoint(-5.0F, 2.5F, 0.0F);
 
         } else {
-            // Standard Classic (Steve) default fallback branch
-            this.bipedLeftArm = new ModelRenderer(this, 32, 48);
+            // Standard Classic (Steve) fallback branch
+            this.bipedLeftArm.cubeList.clear();
+            this.bipedLeftArm.setTextureOffset(32, 48);
             this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4);
             this.bipedLeftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
 
@@ -100,8 +102,9 @@ public class ModelPlayer extends ModelBiped {
             this.bipedRightArmwear.setRotationPoint(-5.0F, 2.0F, 0.0F);
         }
 
-        // 4. Legs Configured globally (Modified with custom chunky offsets)
-        this.bipedLeftLeg = new ModelRenderer(this, 16, 48);
+        // 4. Inject Blockbench leg adjustments into existing base leg pointers
+        this.bipedLeftLeg.cubeList.clear();
+        this.bipedLeftLeg.setTextureOffset(16, 48);
         this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4);
         this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
         this.bipedLeftLeg.rotateAngleZ = 0.0873F; // 5 degrees
@@ -110,7 +113,8 @@ public class ModelPlayer extends ModelBiped {
         this.leftLegChunky.addBox(-7.0F, 0.0F, -3.0F, 7, 12, 6);
         this.bipedLeftLeg.addChild(this.leftLegChunky);
 
-        this.bipedRightLeg = new ModelRenderer(this, 0, 16);
+        this.bipedRightLeg.cubeList.clear();
+        this.bipedRightLeg.setTextureOffset(0, 16);
         this.bipedRightLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4);
         this.bipedRightLeg.setRotationPoint(-1.9F, 12.0F, 0.0F);
         this.bipedRightLeg.rotateAngleZ = -0.0873F; // -5 degrees
@@ -134,6 +138,9 @@ public class ModelPlayer extends ModelBiped {
     }
 
     public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) {
+        // Enforce ambient texture profiles to kill pitch-black rendering bug
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        
         super.render(entity, f, f1, f2, f3, f4, f5);
         GlStateManager.pushMatrix();
         if (this.isChild) {
@@ -158,44 +165,14 @@ public class ModelPlayer extends ModelBiped {
         GlStateManager.popMatrix();
     }
 
-    public void renderDeadmau5Head(float parFloat1) {
-        copyModelAngles(this.bipedHead, this.bipedDeadmau5Head);
-        this.bipedDeadmau5Head.rotationPointX = 0.0F;
-        this.bipedDeadmau5Head.rotationPointY = 0.0F;
-        this.bipedDeadmau5Head.render(parFloat1);
-    }
-
-    public void renderCape(float parFloat1) {
-        GlStateManager.matrixMode(GL_TEXTURE);
-        GlStateManager.pushMatrix();
-        GlStateManager.scale(2.0f, 1.0f, 1.0f);
-        GlStateManager.matrixMode(GL_MODELVIEW);
-        this.bipedCape.render(parFloat1);
-        GlStateManager.matrixMode(GL_TEXTURE);
-        GlStateManager.popMatrix();
-        GlStateManager.matrixMode(GL_MODELVIEW);
-    }
-
-    public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5, Entity entity) {
-        super.setRotationAngles(f, f1, f2, f3, f4, f5, entity);
-        copyModelAngles(this.bipedLeftLeg, this.bipedLeftLegwear);
-        copyModelAngles(this.bipedRightLeg, this.bipedRightLegwear);
-        copyModelAngles(this.bipedLeftArm, this.bipedLeftArmwear);
-        copyModelAngles(this.bipedRightArm, this.bipedRightArmwear);
-        copyModelAngles(this.bipedBody, this.bipedBodyWear);
-        if (entity != null && entity.isSneaking()) {
-            this.bipedCape.rotationPointY = 2.0F;
-        } else {
-            this.bipedCape.rotationPointY = 0.0F;
-        }
-    }
-
     public void renderRightArm() {
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.bipedRightArm.render(0.0625F);
         this.bipedRightArmwear.render(0.0625F);
     }
 
     public void renderLeftArm() {
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.bipedLeftArm.render(0.0625F);
         this.bipedLeftArmwear.render(0.0625F);
     }
