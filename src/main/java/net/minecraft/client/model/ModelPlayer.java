@@ -24,26 +24,6 @@ import net.minecraft.entity.Entity;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  * 
- * ---
- * 
- * Custom body geometry ported from a Blockbench "Modded Entity" export
- * (CustomModel.java) into the ModelBiped skeleton so vanilla walk/swing/
- * sneak/riding animation still drives the limbs. Original Blockbench part
- * names -> biped part mapping:
- *   bb_main (head-ish cubes)             -> bipedHead
- *   bb_main (torso/hip/belt cubes)       -> bipedBody
- *   left_arm_r1 / right_arm_r1           -> bipedLeftArm / bipedRightArm
- *   left_leg_r1 + right_leg_r2 (same X
- *     side, matching baked Z-tilt)       -> bipedLeftLeg
- *   right_leg_r1 + left_leg_r2 (same X
- *     side, matching baked Z-tilt)       -> bipedRightLeg
- * Leg pivots were moved from the exported group's incidental rotation-tool
- * pivot (near the ankle) up to hip height (Y=12, vanilla convention) so
- * walk-swing rotates naturally from the hip; the rigid transform was
- * preserved by adjusting each cube's local offset to compensate, so the
- * rest pose is visually identical to the Blockbench export.
- * Texture is a single fixed 16x16 custom texture (not the per-player 64x64
- * skin) -- see RenderPlayer.getEntityTexture().
  */
 public class ModelPlayer extends ModelBiped {
 	public ModelRenderer bipedLeftArmwear;
@@ -55,91 +35,50 @@ public class ModelPlayer extends ModelBiped {
 	private ModelRenderer bipedDeadmau5Head;
 	private boolean smallArms;
 
-	// baked-in rest-pose tilts from the Blockbench export, re-applied every
-	// frame after ModelBiped's animation logic runs (ModelBiped resets arm
-	// rotateAngleZ to 0.0F each frame, so it can't be set once in the
-	// constructor the way the leg tilt can)
-	private static final float LEFT_ARM_REST_Z = -0.2618F;
-	private static final float RIGHT_ARM_REST_Z = 0.2618F;
-	private static final float LEFT_LEG_REST_Z = 0.0436F;
-	private static final float RIGHT_LEG_REST_Z = -0.0436F;
-
 	public ModelPlayer(float parFloat1, boolean parFlag) {
-		super(parFloat1, 0.0F, 16, 16);
+		super(parFloat1, 0.0F, 64, 64);
 		this.smallArms = parFlag;
-
 		this.bipedDeadmau5Head = new ModelRenderer(this, 24, 0);
 		this.bipedDeadmau5Head.addBox(-3.0F, -6.0F, -1.0F, 6, 6, 1, parFloat1);
 		this.bipedCape = new ModelRenderer(this, 0, 0);
 		this.bipedCape.setTextureSize(64, 32);
 		this.bipedCape.addBox(-5.0F, 0.0F, -1.0F, 10, 16, 1, parFloat1);
+		if (parFlag) {
+			this.bipedLeftArm = new ModelRenderer(this, 32, 48);
+			this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1);
+			this.bipedLeftArm.setRotationPoint(5.0F, 2.5F, 0.0F);
+			this.bipedRightArm = new ModelRenderer(this, 40, 16);
+			this.bipedRightArm.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1);
+			this.bipedRightArm.setRotationPoint(-5.0F, 2.5F, 0.0F);
+			this.bipedLeftArmwear = new ModelRenderer(this, 48, 48);
+			this.bipedLeftArmwear.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1 + 0.25F);
+			this.bipedLeftArmwear.setRotationPoint(5.0F, 2.5F, 0.0F);
+			this.bipedRightArmwear = new ModelRenderer(this, 40, 32);
+			this.bipedRightArmwear.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1 + 0.25F);
+			this.bipedRightArmwear.setRotationPoint(-5.0F, 2.5F, 10.0F);
+		} else {
+			this.bipedLeftArm = new ModelRenderer(this, 32, 48);
+			this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, parFloat1);
+			this.bipedLeftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
+			this.bipedLeftArmwear = new ModelRenderer(this, 48, 48);
+			this.bipedLeftArmwear.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
+			this.bipedLeftArmwear.setRotationPoint(5.0F, 2.0F, 0.0F);
+			this.bipedRightArmwear = new ModelRenderer(this, 40, 32);
+			this.bipedRightArmwear.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
+			this.bipedRightArmwear.setRotationPoint(-5.0F, 2.0F, 10.0F);
+		}
 
-		// --- head: base cube + outer layer cube, pivot (0,0,0) ---
-		this.bipedHead = new ModelRenderer(this, "head");
-		this.bipedHead.setRotationPoint(0.0F, 0.0F, 0.0F);
-		this.bipedHead.cubeList.add(new ModelBox(this.bipedHead, 0, 0, -4.25F, -7.5F, -4.0F, 8, 8, 8, 0.0F, false));
-		this.bipedHead.cubeList.add(new ModelBox(this.bipedHead, 0, 0, -4.75F, -8.0F, -4.5F, 9, 9, 9, 0.0F, false));
-
-		// hat/head-overlay layer is baked into bipedHead above, so leave
-		// bipedHeadwear empty (still needed structurally by ModelBiped)
-		this.bipedHeadwear = new ModelRenderer(this, "headwear");
-		this.bipedHeadwear.setRotationPoint(0.0F, 0.0F, 0.0F);
-
-		// --- body: torso + hips + hip nubs + belt + outer torso layer ---
-		this.bipedBody = new ModelRenderer(this, "body");
-		this.bipedBody.setRotationPoint(0.0F, 0.0F, 0.0F);
-		this.bipedBody.cubeList.add(new ModelBox(this.bipedBody, 0, 0, -4.25F, 0.5F, -2.0F, 8, 11, 4, 0.0F, false));
-		this.bipedBody.cubeList.add(new ModelBox(this.bipedBody, 0, 0, -5.25F, 9.5F, -4.25F, 10, 6, 7, 0.0F, false));
-		this.bipedBody.cubeList.add(new ModelBox(this.bipedBody, 0, 0, -6.0F, 9.5F, -1.25F, 3, 3, 3, 0.0F, false));
-		this.bipedBody.cubeList.add(new ModelBox(this.bipedBody, 0, 0, 2.5F, 9.5F, -1.25F, 3, 3, 3, 0.0F, false));
-		this.bipedBody.cubeList.add(new ModelBox(this.bipedBody, 0, 0, -5.25F, 8.49F, -4.25F, 10, 1, 4, 0.0F, false));
-		this.bipedBody.cubeList.add(new ModelBox(this.bipedBody, 0, 0, -4.75F, 7.5F, -2.5F, 9, 2, 5, 0.0F, false));
-		this.bipedBody.cubeList.add(new ModelBox(this.bipedBody, 0, 0, -4.25F, -0.03F, -2.51F, 8, 12, 5, 0.0F, false));
-
-		// --- arms: pivots from the Blockbench export (converted into
-		// biped-absolute space), rest tilt re-applied in setRotationAngles ---
-		this.bipedLeftArm = new ModelRenderer(this, "leftArm");
-		this.bipedLeftArm.setRotationPoint(6.25F, 6.5F, -0.25F);
-		this.bipedLeftArm.cubeList.add(new ModelBox(this.bipedLeftArm, 0, 0, -2.0F, -6.5F, -1.75F, 3, 13, 4, 0.0F, false));
-		this.bipedLeftArm.cubeList.add(new ModelBox(this.bipedLeftArm, 0, 0, -1.5F, -6.0F, -1.25F, 2, 12, 3, 0.0F, false));
-
-		this.bipedRightArm = new ModelRenderer(this, "rightArm");
-		this.bipedRightArm.setRotationPoint(-6.75F, 6.5F, 0.0F);
-		this.bipedRightArm.cubeList.add(new ModelBox(this.bipedRightArm, 0, 0, -1.5F, -6.5F, -2.0F, 3, 13, 4, 0.0F, false));
-		this.bipedRightArm.cubeList.add(new ModelBox(this.bipedRightArm, 0, 0, -1.0F, -6.0F, -1.5F, 2, 12, 3, 0.0F, false));
-
-		// arm "wear" (sleeve) layers are baked into the arm cubes above --
-		// keep the fields present (referenced elsewhere) but empty
-		this.bipedLeftArmwear = new ModelRenderer(this, "leftArmwear");
-		this.bipedLeftArmwear.setRotationPoint(6.25F, 6.5F, -0.25F);
-		this.bipedRightArmwear = new ModelRenderer(this, "rightArmwear");
-		this.bipedRightArmwear.setRotationPoint(-6.75F, 6.5F, 0.0F);
-
-		// --- legs: pivot raised to hip height (Y=12) from the export's
-		// incidental ankle-area pivot; cube offsets adjusted to compensate
-		// so the rest pose matches the original export exactly ---
-		this.bipedLeftLeg = new ModelRenderer(this, "leftLeg");
-		this.bipedLeftLeg.setRotationPoint(8.25F, 12.0F, -8.0F);
-		this.bipedLeftLeg.rotateAngleZ = LEFT_LEG_REST_Z;
-		this.bipedLeftLeg.cubeList.add(new ModelBox(this.bipedLeftLeg, 0, 0, -8.5F, 0.0F, 4.5F, 7, 13, 7, 0.0F, false));
-		this.bipedLeftLeg.cubeList.add(new ModelBox(this.bipedLeftLeg, 0, 0, -9.0F, 0.5F, 5.25F, 6, 12, 6, 0.0F, false));
-
-		this.bipedRightLeg = new ModelRenderer(this, "rightLeg");
-		this.bipedRightLeg.setRotationPoint(-8.25F, 12.0F, -8.0F);
-		this.bipedRightLeg.rotateAngleZ = RIGHT_LEG_REST_Z;
-		this.bipedRightLeg.cubeList.add(new ModelBox(this.bipedRightLeg, 0, 0, 1.5F, 0.0F, 4.5F, 7, 13, 7, 0.0F, false));
-		this.bipedRightLeg.cubeList.add(new ModelBox(this.bipedRightLeg, 0, 0, 2.5F, 0.5F, 5.25F, 6, 12, 6, 0.0F, false));
-
-		// leg "wear" (pants) layers baked into leg cubes above -- keep
-		// fields present but empty
-		this.bipedLeftLegwear = new ModelRenderer(this, "leftLegwear");
-		this.bipedLeftLegwear.setRotationPoint(8.25F, 12.0F, -8.0F);
-		this.bipedRightLegwear = new ModelRenderer(this, "rightLegwear");
-		this.bipedRightLegwear.setRotationPoint(-8.25F, 12.0F, -8.0F);
-
-		// body "wear" (jacket) layer baked into body cubes above -- keep
-		// field present but empty
-		this.bipedBodyWear = new ModelRenderer(this, "bodyWear");
+		this.bipedLeftLeg = new ModelRenderer(this, 16, 48);
+		this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, parFloat1);
+		this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
+		this.bipedLeftLegwear = new ModelRenderer(this, 0, 48);
+		this.bipedLeftLegwear.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
+		this.bipedLeftLegwear.setRotationPoint(1.9F, 12.0F, 0.0F);
+		this.bipedRightLegwear = new ModelRenderer(this, 0, 32);
+		this.bipedRightLegwear.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
+		this.bipedRightLegwear.setRotationPoint(-1.9F, 12.0F, 0.0F);
+		this.bipedBodyWear = new ModelRenderer(this, 16, 32);
+		this.bipedBodyWear.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, parFloat1 + 0.25F);
 		this.bipedBodyWear.setRotationPoint(0.0F, 0.0F, 0.0F);
 	}
 
@@ -201,14 +140,6 @@ public class ModelPlayer extends ModelBiped {
 	 */
 	public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5, Entity entity) {
 		super.setRotationAngles(f, f1, f2, f3, f4, f5, entity);
-
-		// re-apply the custom model's baked rest-pose tilts on top of
-		// whatever ModelBiped's vanilla animation just computed
-		this.bipedLeftArm.rotateAngleZ += LEFT_ARM_REST_Z;
-		this.bipedRightArm.rotateAngleZ += RIGHT_ARM_REST_Z;
-		this.bipedLeftLeg.rotateAngleZ = LEFT_LEG_REST_Z;
-		this.bipedRightLeg.rotateAngleZ = RIGHT_LEG_REST_Z;
-
 		copyModelAngles(this.bipedLeftLeg, this.bipedLeftLegwear);
 		copyModelAngles(this.bipedRightLeg, this.bipedRightLegwear);
 		copyModelAngles(this.bipedLeftArm, this.bipedLeftArmwear);
