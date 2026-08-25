@@ -3,6 +3,7 @@ package net.minecraft.client.model;
 import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
 import net.minecraft.entity.Entity;
+import com.google.common.collect.Lists;
 
 public class ModelPlayer extends ModelBiped {
     public ModelRenderer bipedLeftArmwear;
@@ -38,17 +39,17 @@ public class ModelPlayer extends ModelBiped {
             // SLIM MODEL (ALEX) - SAFE GEOMETRY OVERRIDES
             // ==========================================
             
-            // 1. Clear default Steve head box & insert Blockbench configuration
-            this.bipedHead.cubeList.clear();
+            // 1. Wipe default Steve head box & insert Blockbench configuration safely
+            this.bipedHead.cubeList = Lists.newArrayList();
             this.bipedHead.setTextureOffset(0, 0);
             this.bipedHead.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8);
             
-            this.bipedHeadwear.cubeList.clear();
+            this.bipedHeadwear.cubeList = Lists.newArrayList();
             this.bipedHeadwear.setTextureOffset(32, 0);
             this.bipedHeadwear.addBox(-4.5F, -8.5F, -4.5F, 9, 9, 9);
 
-            // 2. Clear default body & add custom stacked Blockbench shapes
-            this.bipedBody.cubeList.clear();
+            // 2. Wipe default body & add custom stacked Blockbench shapes
+            this.bipedBody.cubeList = Lists.newArrayList();
             this.bipedBody.setTextureOffset(16, 20);
             this.bipedBody.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4);
 
@@ -66,13 +67,13 @@ public class ModelPlayer extends ModelBiped {
             this.bipedBody.addChild(this.bodyExtraLayer3);
 
             // 3. Reconfigure Slim arms (3-pixel width) inside existing base elements
-            this.bipedLeftArm.cubeList.clear();
+            this.bipedLeftArm.cubeList = Lists.newArrayList();
             this.bipedLeftArm.setTextureOffset(32, 48);
             this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4);
             this.bipedLeftArm.setRotationPoint(5.0F, 2.5F, 0.0F);
             this.bipedLeftArm.rotateAngleZ = -0.3054F; // -17.5 degrees
 
-            this.bipedRightArm.cubeList.clear();
+            this.bipedRightArm.cubeList = Lists.newArrayList();
             this.bipedRightArm.setTextureOffset(40, 16);
             this.bipedRightArm.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4);
             this.bipedRightArm.setRotationPoint(-5.0F, 2.5F, 0.0F);
@@ -88,7 +89,7 @@ public class ModelPlayer extends ModelBiped {
 
         } else {
             // Standard Classic (Steve) fallback branch
-            this.bipedLeftArm.cubeList.clear();
+            this.bipedLeftArm.cubeList = Lists.newArrayList();
             this.bipedLeftArm.setTextureOffset(32, 48);
             this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4);
             this.bipedLeftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
@@ -103,7 +104,7 @@ public class ModelPlayer extends ModelBiped {
         }
 
         // 4. Inject Blockbench leg adjustments into existing base leg pointers
-        this.bipedLeftLeg.cubeList.clear();
+        this.bipedLeftLeg.cubeList = Lists.newArrayList();
         this.bipedLeftLeg.setTextureOffset(16, 48);
         this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4);
         this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
@@ -113,7 +114,7 @@ public class ModelPlayer extends ModelBiped {
         this.leftLegChunky.addBox(-7.0F, 0.0F, -3.0F, 7, 12, 6);
         this.bipedLeftLeg.addChild(this.leftLegChunky);
 
-        this.bipedRightLeg.cubeList.clear();
+        this.bipedRightLeg.cubeList = Lists.newArrayList();
         this.bipedRightLeg.setTextureOffset(0, 16);
         this.bipedRightLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4);
         this.bipedRightLeg.setRotationPoint(-1.9F, 12.0F, 0.0F);
@@ -175,6 +176,26 @@ public class ModelPlayer extends ModelBiped {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.bipedLeftArm.render(0.0625F);
         this.bipedLeftArmwear.render(0.0625F);
+    }
+
+    // Fixes the deadmau5 error thrown by LayerDeadmau5Head.java
+    public void renderDeadmau5Head(float parFloat1) {
+        copyModelAngles(this.bipedHead, this.bipedDeadmau5Head);
+        this.bipedDeadmau5Head.rotationPointX = 0.0F;
+        this.bipedDeadmau5Head.rotationPointY = 0.0F;
+        this.bipedDeadmau5Head.render(parFloat1);
+    }
+
+    // Fixes the cape error thrown by SkinPreviewRenderer.java and LayerCape.java
+    public void renderCape(float parFloat1) {
+        GlStateManager.matrixMode(GL_TEXTURE);
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(2.0f, 1.0f, 1.0f);
+        GlStateManager.matrixMode(GL_MODELVIEW);
+        this.bipedCape.render(parFloat1);
+        GlStateManager.matrixMode(GL_TEXTURE);
+        GlStateManager.popMatrix();
+        GlStateManager.matrixMode(GL_MODELVIEW);
     }
 
     public void setInvisible(boolean flag) {
