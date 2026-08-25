@@ -2,15 +2,8 @@ package net.minecraft.client.model;
 
 import static net.lax1dude.eaglercraft.v1_8.opengl.RealOpenGLEnums.*;
 
-import java.util.List;
-
-import com.google.common.collect.Lists;
-
-import net.lax1dude.eaglercraft.v1_8.opengl.EaglercraftGPU;
 import net.lax1dude.eaglercraft.v1_8.opengl.GlStateManager;
-import net.lax1dude.eaglercraft.v1_8.opengl.WorldRenderer;
-import net.minecraft.client.renderer.GLAllocation;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.entity.Entity;
 
 /**+
  * This portion of EaglercraftX contains deobfuscated Minecraft 1.8 source code.
@@ -32,263 +25,163 @@ import net.minecraft.client.renderer.Tessellator;
  * POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-public class ModelRenderer {
-	public float textureWidth;
-	public float textureHeight;
-	private int textureOffsetX;
-	private int textureOffsetY;
-	public float rotationPointX;
-	public float rotationPointY;
-	public float rotationPointZ;
-	public float rotateAngleX;
-	public float rotateAngleY;
-	public float rotateAngleZ;
-	private boolean compiled;
-	private int displayList;
-	public boolean mirror;
-	public boolean showModel;
-	public boolean isHidden;
-	public List<ModelBox> cubeList;
-	public List<ModelRenderer> childModels;
-	public final String boxName;
-	private ModelBase baseModel;
-	public float offsetX;
-	public float offsetY;
-	public float offsetZ;
+public class ModelPlayer extends ModelBiped {
+	public ModelRenderer bipedLeftArmwear;
+	public ModelRenderer bipedRightArmwear;
+	public ModelRenderer bipedLeftLegwear;
+	public ModelRenderer bipedRightLegwear;
+	public ModelRenderer bipedBodyWear;
+	private ModelRenderer bipedCape;
+	private ModelRenderer bipedDeadmau5Head;
+	private boolean smallArms;
 
-	public ModelRenderer(ModelBase model, String boxNameIn) {
-		this.textureWidth = 64.0F;
-		this.textureHeight = 32.0F;
-		this.showModel = true;
-		this.cubeList = Lists.newArrayList();
-		this.baseModel = model;
-		model.boxList.add(this);
-		this.boxName = boxNameIn;
-		this.setTextureSize(model.textureWidth, model.textureHeight);
-	}
-
-	public ModelRenderer(ModelBase model) {
-		this(model, (String) null);
-	}
-
-	public ModelRenderer(ModelBase model, int texOffX, int texOffY) {
-		this(model);
-		this.setTextureOffset(texOffX, texOffY);
-	}
-
-	/**+
-	 * Sets the current box's rotation points and rotation angles to
-	 * another box.
-	 */
-	public void addChild(ModelRenderer renderer) {
-		if (this.childModels == null) {
-			this.childModels = Lists.newArrayList();
+	public ModelPlayer(float parFloat1, boolean parFlag) {
+		super(parFloat1, 0.0F, 64, 64);
+		this.smallArms = parFlag;
+		this.bipedDeadmau5Head = new ModelRenderer(this, 24, 0);
+		this.bipedDeadmau5Head.addBox(-3.0F, -6.0F, -1.0F, 6, 6, 1, parFloat1);
+		this.bipedCape = new ModelRenderer(this, 0, 0);
+		this.bipedCape.setTextureSize(64, 32);
+		this.bipedCape.addBox(-5.0F, 0.0F, -1.0F, 10, 16, 1, parFloat1);
+		if (parFlag) {
+			this.bipedLeftArm = new ModelRenderer(this, 32, 48);
+			this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1);
+			this.bipedLeftArm.setRotationPoint(5.0F, 2.5F, 0.0F);
+			this.bipedRightArm = new ModelRenderer(this, 40, 16);
+			this.bipedRightArm.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1);
+			this.bipedRightArm.setRotationPoint(-5.0F, 2.5F, 0.0F);
+			this.bipedLeftArmwear = new ModelRenderer(this, 48, 48);
+			this.bipedLeftArmwear.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1 + 0.25F);
+			this.bipedLeftArmwear.setRotationPoint(5.0F, 2.5F, 0.0F);
+			this.bipedRightArmwear = new ModelRenderer(this, 40, 32);
+			this.bipedRightArmwear.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, parFloat1 + 0.25F);
+			this.bipedRightArmwear.setRotationPoint(-5.0F, 2.5F, 10.0F);
+		} else {
+			this.bipedLeftArm = new ModelRenderer(this, 32, 48);
+			this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, parFloat1);
+			this.bipedLeftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
+			this.bipedLeftArmwear = new ModelRenderer(this, 48, 48);
+			this.bipedLeftArmwear.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
+			this.bipedLeftArmwear.setRotationPoint(5.0F, 2.0F, 0.0F);
+			this.bipedRightArmwear = new ModelRenderer(this, 40, 32);
+			this.bipedRightArmwear.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
+			this.bipedRightArmwear.setRotationPoint(-5.0F, 2.0F, 10.0F);
 		}
 
-		this.childModels.add(renderer);
-	}
-
-	public ModelRenderer setTextureOffset(int x, int y) {
-		this.textureOffsetX = x;
-		this.textureOffsetY = y;
-		return this;
-	}
-
-	/**+
-	 * Creates a textured box. Args: originX, originY, originZ,
-	 * width, height, depth, scaleFactor.
-	 */
-	public ModelRenderer addBox(String partName, float offX, float offY, float offZ, int width, int height, int depth) {
-		partName = this.boxName + "." + partName;
-		TextureOffset textureoffset = this.baseModel.getTextureOffset(partName);
-		this.setTextureOffset(textureoffset.textureOffsetX, textureoffset.textureOffsetY);
-		this.cubeList.add((new ModelBox(this, this.textureOffsetX, this.textureOffsetY, offX, offY, offZ, width, height,
-				depth, 0.0F)).setBoxName(partName));
-		return this;
+		this.bipedLeftLeg = new ModelRenderer(this, 16, 48);
+		this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, parFloat1);
+		this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
+		this.bipedLeftLegwear = new ModelRenderer(this, 0, 48);
+		this.bipedLeftLegwear.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
+		this.bipedLeftLegwear.setRotationPoint(1.9F, 12.0F, 0.0F);
+		this.bipedRightLegwear = new ModelRenderer(this, 0, 32);
+		this.bipedRightLegwear.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, parFloat1 + 0.25F);
+		this.bipedRightLegwear.setRotationPoint(-1.9F, 12.0F, 0.0F);
+		this.bipedBodyWear = new ModelRenderer(this, 16, 32);
+		this.bipedBodyWear.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, parFloat1 + 0.25F);
+		this.bipedBodyWear.setRotationPoint(0.0F, 0.0F, 0.0F);
 	}
 
 	/**+
-	 * Creates a textured box. Args: originX, originY, originZ,
-	 * width, height, depth, scaleFactor.
+	 * Sets the models various rotation angles then renders the
+	 * model.
 	 */
-	public ModelRenderer addBox(float offX, float offY, float offZ, int width, int height, int depth) {
-		this.cubeList.add(new ModelBox(this, this.textureOffsetX, this.textureOffsetY, offX, offY, offZ, width, height,
-				depth, 0.0F));
-		return this;
-	}
-
-	/**+
-	 * Creates a textured box. Args: originX, originY, originZ,
-	 * width, height, depth, scaleFactor.
-	 */
-	public ModelRenderer addBox(float parFloat1, float parFloat2, float parFloat3, int parInt1, int parInt2,
-			int parInt3, boolean parFlag) {
-		this.cubeList.add(new ModelBox(this, this.textureOffsetX, this.textureOffsetY, parFloat1, parFloat2, parFloat3,
-				parInt1, parInt2, parInt3, 0.0F, parFlag));
-		return this;
-	}
-
-	/**+
-	 * Creates a textured box. Args: originX, originY, originZ,
-	 * width, height, depth, scaleFactor.
-	 */
-	public void addBox(float width, float height, float depth, int scaleFactor, int parInt2, int parInt3,
-			float parFloat4) {
-		this.cubeList.add(new ModelBox(this, this.textureOffsetX, this.textureOffsetY, width, height, depth,
-				scaleFactor, parInt2, parInt3, parFloat4));
-	}
-
-	public void setRotationPoint(float rotationPointXIn, float rotationPointYIn, float rotationPointZIn) {
-		this.rotationPointX = rotationPointXIn;
-		this.rotationPointY = rotationPointYIn;
-		this.rotationPointZ = rotationPointZIn;
-	}
-
-	public void render(float parFloat1) {
-		if (!this.isHidden) {
-			if (this.showModel) {
-				if (!this.compiled) {
-					this.compileDisplayList(parFloat1);
-				}
-
-				GlStateManager.translate(this.offsetX, this.offsetY, this.offsetZ);
-				if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F) {
-					if (this.rotationPointX == 0.0F && this.rotationPointY == 0.0F && this.rotationPointZ == 0.0F) {
-						GlStateManager.callList(this.displayList);
-						if (this.childModels != null) {
-							for (int k = 0; k < this.childModels.size(); ++k) {
-								((ModelRenderer) this.childModels.get(k)).render(parFloat1);
-							}
-						}
-					} else {
-						GlStateManager.translate(this.rotationPointX * parFloat1, this.rotationPointY * parFloat1,
-								this.rotationPointZ * parFloat1);
-						GlStateManager.callList(this.displayList);
-						if (this.childModels != null) {
-							for (int j = 0; j < this.childModels.size(); ++j) {
-								((ModelRenderer) this.childModels.get(j)).render(parFloat1);
-							}
-						}
-
-						GlStateManager.translate(-this.rotationPointX * parFloat1, -this.rotationPointY * parFloat1,
-								-this.rotationPointZ * parFloat1);
-					}
-				} else {
-					GlStateManager.pushMatrix();
-					GlStateManager.translate(this.rotationPointX * parFloat1, this.rotationPointY * parFloat1,
-							this.rotationPointZ * parFloat1);
-					if (this.rotateAngleZ != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleZ * 57.295776F, 0.0F, 0.0F, 1.0F);
-					}
-
-					if (this.rotateAngleY != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleY * 57.295776F, 0.0F, 1.0F, 0.0F);
-					}
-
-					if (this.rotateAngleX != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleX * 57.295776F, 1.0F, 0.0F, 0.0F);
-					}
-
-					GlStateManager.callList(this.displayList);
-					if (this.childModels != null) {
-						for (int i = 0; i < this.childModels.size(); ++i) {
-							((ModelRenderer) this.childModels.get(i)).render(parFloat1);
-						}
-					}
-
-					GlStateManager.popMatrix();
-				}
-
-				GlStateManager.translate(-this.offsetX, -this.offsetY, -this.offsetZ);
+	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) {
+		super.render(entity, f, f1, f2, f3, f4, f5);
+		GlStateManager.pushMatrix();
+		if (this.isChild) {
+			float f6 = 2.0F;
+			GlStateManager.scale(1.0F / f6, 1.0F / f6, 1.0F / f6);
+			GlStateManager.translate(0.0F, 24.0F * f5, 0.0F);
+			this.bipedLeftLegwear.render(f5);
+			this.bipedRightLegwear.render(f5);
+			this.bipedLeftArmwear.render(f5);
+			this.bipedRightArmwear.render(f5);
+			this.bipedBodyWear.render(f5);
+		} else {
+			if (entity != null && entity.isSneaking()) {
+				GlStateManager.translate(0.0F, 0.2F, 0.0F);
 			}
+
+			this.bipedLeftLegwear.render(f5);
+			this.bipedRightLegwear.render(f5);
+			this.bipedLeftArmwear.render(f5);
+			this.bipedRightArmwear.render(f5);
+			this.bipedBodyWear.render(f5);
 		}
+
+		GlStateManager.popMatrix();
 	}
 
-	public void renderWithRotation(float parFloat1) {
-		if (!this.isHidden) {
-			if (this.showModel) {
-				if (!this.compiled) {
-					this.compileDisplayList(parFloat1);
-				}
-
-				GlStateManager.pushMatrix();
-				GlStateManager.translate(this.rotationPointX * parFloat1, this.rotationPointY * parFloat1,
-						this.rotationPointZ * parFloat1);
-				if (this.rotateAngleY != 0.0F) {
-					GlStateManager.rotate(this.rotateAngleY * 57.295776F, 0.0F, 1.0F, 0.0F);
-				}
-
-				if (this.rotateAngleX != 0.0F) {
-					GlStateManager.rotate(this.rotateAngleX * 57.295776F, 1.0F, 0.0F, 0.0F);
-				}
-
-				if (this.rotateAngleZ != 0.0F) {
-					GlStateManager.rotate(this.rotateAngleZ * 57.295776F, 0.0F, 0.0F, 1.0F);
-				}
-
-				GlStateManager.callList(this.displayList);
-				GlStateManager.popMatrix();
-			}
-		}
+	public void renderDeadmau5Head(float parFloat1) {
+		copyModelAngles(this.bipedHead, this.bipedDeadmau5Head);
+		this.bipedDeadmau5Head.rotationPointX = 0.0F;
+		this.bipedDeadmau5Head.rotationPointY = 0.0F;
+		this.bipedDeadmau5Head.render(parFloat1);
 	}
 
-	/**+
-	 * Allows the changing of Angles after a box has been rendered
-	 */
-	public void postRender(float scale) {
-		if (!this.isHidden) {
-			if (this.showModel) {
-				if (!this.compiled) {
-					this.compileDisplayList(scale);
-				}
-
-				if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F) {
-					if (this.rotationPointX != 0.0F || this.rotationPointY != 0.0F || this.rotationPointZ != 0.0F) {
-						GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale,
-								this.rotationPointZ * scale);
-					}
-				} else {
-					GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale,
-							this.rotationPointZ * scale);
-					if (this.rotateAngleZ != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleZ * 57.295776F, 0.0F, 0.0F, 1.0F);
-					}
-
-					if (this.rotateAngleY != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleY * 57.295776F, 0.0F, 1.0F, 0.0F);
-					}
-
-					if (this.rotateAngleX != 0.0F) {
-						GlStateManager.rotate(this.rotateAngleX * 57.295776F, 1.0F, 0.0F, 0.0F);
-					}
-				}
-
-			}
-		}
+	public void renderCape(float parFloat1) {
+		GlStateManager.matrixMode(GL_TEXTURE);
+		GlStateManager.pushMatrix();
+		GlStateManager.scale(2.0f, 1.0f, 1.0f);
+		GlStateManager.matrixMode(GL_MODELVIEW);
+		this.bipedCape.render(parFloat1);
+		GlStateManager.matrixMode(GL_TEXTURE);
+		GlStateManager.popMatrix();
+		GlStateManager.matrixMode(GL_MODELVIEW);
 	}
 
 	/**+
-	 * Compiles a GL display list for this model
+	 * Sets the model's various rotation angles. For bipeds, par1
+	 * and par2 are used for animating the movement of arms and
+	 * legs, where par1 represents the time(so that arms and legs
+	 * swing back and forth) and par2 represents how "far" arms and
+	 * legs can swing at most.
 	 */
-	private void compileDisplayList(float scale) {
-		this.displayList = GLAllocation.generateDisplayLists();
-		EaglercraftGPU.glNewList(this.displayList, GL_COMPILE);
-		WorldRenderer worldrenderer = Tessellator.getInstance().getWorldRenderer();
-
-		for (int i = 0; i < this.cubeList.size(); ++i) {
-			((ModelBox) this.cubeList.get(i)).render(worldrenderer, scale);
+	public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5, Entity entity) {
+		super.setRotationAngles(f, f1, f2, f3, f4, f5, entity);
+		copyModelAngles(this.bipedLeftLeg, this.bipedLeftLegwear);
+		copyModelAngles(this.bipedRightLeg, this.bipedRightLegwear);
+		copyModelAngles(this.bipedLeftArm, this.bipedLeftArmwear);
+		copyModelAngles(this.bipedRightArm, this.bipedRightArmwear);
+		copyModelAngles(this.bipedBody, this.bipedBodyWear);
+		if (entity != null && entity.isSneaking()) {
+			this.bipedCape.rotationPointY = 2.0F;
+		} else {
+			this.bipedCape.rotationPointY = 0.0F;
 		}
 
-		EaglercraftGPU.glEndList();
-		this.compiled = true;
 	}
 
-	/**+
-	 * Returns the model renderer with the new texture parameters.
-	 */
-	public ModelRenderer setTextureSize(int textureWidthIn, int textureHeightIn) {
-		this.textureWidth = (float) textureWidthIn;
-		this.textureHeight = (float) textureHeightIn;
-		return this;
+	public void renderRightArm() {
+		this.bipedRightArm.render(0.0625F);
+		this.bipedRightArmwear.render(0.0625F);
+	}
+
+	public void renderLeftArm() {
+		this.bipedLeftArm.render(0.0625F);
+		this.bipedLeftArmwear.render(0.0625F);
+	}
+
+	public void setInvisible(boolean flag) {
+		super.setInvisible(flag);
+		this.bipedLeftArmwear.showModel = flag;
+		this.bipedRightArmwear.showModel = flag;
+		this.bipedLeftLegwear.showModel = flag;
+		this.bipedRightLegwear.showModel = flag;
+		this.bipedBodyWear.showModel = flag;
+		this.bipedCape.showModel = flag;
+		this.bipedDeadmau5Head.showModel = flag;
+	}
+
+	public void postRenderArm(float f) {
+		if (this.smallArms) {
+			++this.bipedRightArm.rotationPointX;
+			this.bipedRightArm.postRender(f);
+			--this.bipedRightArm.rotationPointX;
+		} else {
+			this.bipedRightArm.postRender(f);
+		}
+
 	}
 }
