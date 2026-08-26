@@ -129,17 +129,12 @@ public class RenderPlayer extends RendererLivingEntity<AbstractClientPlayer> {
 
 	}
 
-	// fixed texture used by every player, replacing the downloaded 64x64
-	// per-player skin -- matches the 16x16 UV layout baked into ModelPlayer
-	private static final ResourceLocation CUSTOM_PLAYER_TEXTURE = new ResourceLocation(
-			"textures/entity/custom_player.png");
-
 	/**+
 	 * Returns the location of an entity's texture. Doesn't seem to
 	 * be called unless you call Render.bindEntityTexture.
 	 */
 	protected ResourceLocation getEntityTexture(AbstractClientPlayer abstractclientplayer) {
-		return CUSTOM_PLAYER_TEXTURE;
+		return abstractclientplayer.getLocationSkin();
 	}
 
 	public void transformHeldFull3DItemLayer() {
